@@ -41,12 +41,48 @@ poetry shell # activates virtual environment
 ```
 ### Usage:
 
+For a quick start use the default base classes.
 ```python
-import translation_agent as ta
-source_lang, target_lang, country = "English", "Spanish", "Mexico"
-translation = ta.translate(source_lang, target_lang, source_text, country)
+import os
+import openai
+
+from translation_agent.llms import OpenAIModel
+from translation_agent.prompts import BASE_PROMPT_CONFIG
+from translation_agent.splitters import UniformTextSplitter
+from translation_agent.agents import SimpleTranslationAgent
+
+
+source_lang, target_lang = "English", "Spanish"
+
+# configure llm
+openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = OpenAIModel(client=openai_client, temperature=0.5)
+
+# configure prompts
+prompt_config = BASE_PROMPT_CONFIG
+
+# configure splitter
+splitter = UniformTextSplitter(num_chunks=2)
+
+# configure agent
+agent = SimpleTranslationAgent(
+        llm=llm,
+        text_splitter=splitter,
+        prompts=prompt_config,
+        source_lang=source_lang,
+        target_lang=target_lang,
+        verbose=True,
+        max_workers=2,
+    )
+
+source_text = "some long string ..."
+translation = agent.agentic_translate(source_text)
+
+print("source_text:", source_text)
+print("translation:", translation)
+
 ```
-See examples/example_script.py for an example script to try out.
+See examples/example.py for an example script to try out.
 
 ## License
 
